@@ -1,0 +1,102 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage{fullpage}
+\usepackage[dutch]{babel}
+\usepackage{tabu}
+\usepackage[table]{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, urlcolor=blue}
+\begin{document}
+\title{Code Challenge uit Java Magazine \#3}
+\author{Raymond Cuenen}
+\maketitle
+\section*{Op huizenjacht}
+De opdracht is om de eerste $20$ paren $(x, y)$ te vinden waarvan het huisnummer $x$ in een straat met huisnummers $1$ tot en met $y$ zodanig is dat de som van de huisnummers $1$ tot $x$ gelijk is aan de som van de huisnummers vanaf $x$ tot en met $y$.\\[11pt]
+Mede door de hint uit de tekst lijkt me dit meer op \textbf{Math Challenge} in plaats van een \textbf{Code Challenge}.\\
+Gauss liet rond 1800 zien dat de som van de eerste $n$ gehele getallen gelijk is aan het \href{http://nl.wikipedia.org/wiki/Rekenkundig_gemiddelde}{rekenkundig gemiddelde}, oftewel:
+$$\sum_{k=1}^nk=\frac{1}{2}n(n+1).$$
+Dit is eigenlijk een speciaal geval van de algemenere \href{http://nl.wikipedia.org/wiki/Rekenkundige_rij}{rekenkundige rij}, waarvoor geldt:
+$$\sum_{k=0}^{n-1}(a+kd)=\frac{n}{2}(2a+(n-1)d),$$
+waarbij $a$ de eerste term is (voor Gauss is dit $1$), $d$ is het verschil of de afstand tussen de getallen (voor Gauss is dit ook $1$) en $n$ is het aantal getallen waarover gesommeerd wordt.\\[11pt]
+Voor de uitvoering van de opdracht moeten we dus oplossingen vinden waarbij twee rekenkundige rijen aan elkaar gelijk zijn. Maar wat zijn de parameters van die rijen? Allereerst geldt voor ons ook dat $d=1$; we hebben immers opeenvolgende huisnummers.\\
+Voor de eerste som beginnen we bij $1$, dus $a=1$, en we tellen tot ons huisnummer $x$, dus $n=x-1$, oftewel:
+$$\sum_{k=0}^{x-2}(1+k)=\frac{1}{2}x(x-1).$$
+Voor de andere som beginnen we bij het huisnummer van de buren, dus $a=x+1$, en we tellen tot het eind van de straat, dus $n=y-x$, oftewel:
+$$\sum_{k=0}^{y-x-1}(x+1+k)=-\frac{1}{2}(x-y)(x+y+1).$$
+Wanneer we deze twee polynomen aan elkaar gelijk stellen kunnen we deze herschrijven tot:
+$$\begin{array}{rl}
+\frac{1}{2}x(x-1)&=-\frac{1}{2}(x-y)(x+y+1)\\
+\frac{1}{2}x(x-1)+\frac{1}{2}(x-y)(x+y+1)&=0\\
+2x^2-y^2-y&=0.
+\end{array}$$
+We hebben nu de opdracht gereduceerd tot het oplossen van bovenstaande tweede-orde bivariate \href{http://nl.wikipedia.org/wiki/Diophantische_vergelijking}{Diophantische vergelijking}. Dit is inderdaad wel een beetje lastig om zelf te doen, maar gelukkig hebben we \href{http://www.wolframalpha.com/share/clip?f=d41d8cd98f00b204e9800998ecf8427epoad5fkns7}{WolframAlpha} en vinden we al snel:
+$$\begin{array}{rl}
+x&=\frac{1}{4}\left.\left((3+2\sqrt{2})^t-(3-2\sqrt{2})^t\right)\right/\sqrt{2},\\
+y&=\frac{1}{4}\left((3+2\sqrt{2})^t+(3-2\sqrt{2})^t\right)-\frac{1}{2}.
+\end{array}$$
+In de tekst wordt al aangegeven dat de triviale oplossing met maar \'{e}\'{e}n huis ($t=1$) buiten beschouwing wordt gelaten. Eigenlijk is een straat zonder huis ($t=0$) ook een oplossing, maar die laten we ook maar buiten beschouwing. De volgende twee oplossingen $t=2\Rightarrow(6, 8)$ en $t=3\Rightarrow(35, 49)$ zijn ook al gegeven. Voor de volgende $20$ oplossingen hoeven we dus alleen maar $x$ en $y$ uit te rekenen voor $4\leq t<24$.\\
+Dit vergt natuurlijk niet zo heel veel code (in elke willekeurige taal). Het enige waar we op moeten letten is de naukeurigheid van de gebruikte wiskundige functies en de binaire representatie van de getallen.\\
+Voor een \texttt{long}/\texttt{double} implementatie hebben we te maken met een \texttt{Long.MAX\_VALUE} van $2^{63}-1$ en een double-precisie van ongeveer $16$ getallen. Wanneer we ${y\leq2^{63}-1}$ en ${\log_{10}(y)+1\leq16}$ oplossen vinden we $t\leq25$ en $t\leq20$ resp. Dit betekent dat we op deze manier niet aan de opdracht kunnen voldoen.\\
+We moeten dus een implementatie maken met \texttt{BigInteger}/\texttt{BigDecimal}. Hierbij hebben we het probleem dat er geen \texttt{sqrt}-methode is gedefinieerd voor deze objecten. Gelukkig kunnen we de \href{http://nl.wikipedia.org/wiki/Methode_van_Newton-Raphson}{Methode van Newton-Raphson} toepassen om de waarde van $\sqrt{2}$ te berekenen voor, laten we zeggen, $150$ significante getallen.\\[11pt]
+Aan de formules voor $x$ en $y$ kunnen we ook zien dat de limiet van $t\to\infty$ ook oneindig als resultaat heeft. Als er dus verder geen restricties aan de straat verbonden zijn is er dus \textbf{geen} grootste straat die voldoet.
+\subsection*{De eerste 20 oplossingen}
+\rowcolors{1}{lightgray}{white}
+\begin{tabu}{|r|r|r|}
+\hline
+\hiderowcolors
+\rowfont{\bfseries} Nr. & Huisnummer & Laatste huisnummer\\
+\hline
+0 & 0 & 0\\
+\showrowcolors
+\hline
+1 & 1 & 1\\
+\hline
+2 & 6 & 8\\
+\hline
+3 & 35 & 49\\
+\hline
+4 & 204 & 288\\
+\hline
+5 & 1189 & 1681\\
+\hline
+6 & 6930 & 9800\\
+\hline
+7 & 40391 & 57121\\
+\hline
+8 & 235416 & 332928\\
+\hline
+9 & 1372105 & 1940449\\
+\hline
+10 & 7997214 & 11309768\\
+\hline
+11 & 46611179 & 65918161\\
+\hline
+12 & 271669860 & 384199200\\
+\hline
+13 & 1583407981 & 2239277041\\
+\hline
+14 & 9228778026 & 13051463048\\
+\hline
+15 & 53789260175 & 76069501249\\
+\hline
+16 & 313506783024 & 443365544448\\
+\hline
+17 & 1827251437969 & 2584123765441\\
+\hline
+18 & 10650001844790 & 15061377048200\\
+\hline
+19 & 62072759630771 & 87784138523761\\
+\hline
+20 & 361786555939836 & 511643454094368\\
+\hline
+21 & 2108646576008245 & 2982076586042449\\
+\hline
+22 & 12290092900109634 & 17380816062160328\\
+\hline
+23 & 71631910824649559 & 101302819786919521\\
+\hline
+24 & 417501372047787720 & 590436102659356800\\
+\hline
+25 & 2433376321462076761 & 344131379616922128\\
+\hline
+\end{tabu}
+\end{document}
